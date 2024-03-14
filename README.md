@@ -16,7 +16,7 @@ This project is a Spring Boot-based microservice designed to facilitate financia
 ### Prerequisites
 
 - JDK 17: Ensure you have at least this JDK version installed.
-- Maven: Required for project dependency management and build.
+- Maven latest version 3.9.6: Required for project dependency management and build.
 - Visual Studio Code (VS Code) used with the following extensions:
   - Extension Pack for Java
   - Spring Boot Extension Pack

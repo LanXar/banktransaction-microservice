@@ -77,7 +77,6 @@ This project is a Spring Boot-based microservice designed to facilitate financia
 
 To run the project's automated tests, use the following command:
 
-- For Maven:
 
   ```bash
   mvn test

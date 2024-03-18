@@ -1,6 +1,11 @@
 package com.banktransaction.banktransactionmicroservice.controller;
 
 import com.banktransaction.banktransactionmicroservice.service.TransactionService;
+
+import jakarta.validation.Valid; // Import for validation
+import jakarta.validation.constraints.NotNull; // Import for NotNull validation
+import jakarta.validation.constraints.Positive; // Import for Positive validation
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +20,7 @@ public class TransactionController {
     private TransactionService transactionService;
 
     @PostMapping("/transactions")
-    public ResponseEntity<?> createTransaction(@RequestBody TransactionRequest transactionRequest) {
+    public ResponseEntity<?> createTransaction(@Valid @RequestBody TransactionRequest transactionRequest) {
         try {
             transactionService.processTransaction(
                     transactionRequest.getSourceAccountId(), 
@@ -27,13 +32,17 @@ public class TransactionController {
         }
     }
 
-    // Inner class to handle request data
     static class TransactionRequest {
+        @NotNull(message = "Source account ID cannot be null")
         private Long sourceAccountId;
+
+        @NotNull(message = "Target account ID cannot be null")
         private Long targetAccountId;
+
+        @NotNull(message = "Amount cannot be null")
+        @Positive(message = "Amount must be greater than 0")
         private BigDecimal amount;
 
-        // Getters and setters are crucial for Spring to bind request body data
         public Long getSourceAccountId() {
             return sourceAccountId;
         }

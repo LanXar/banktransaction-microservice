@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 @Service
 public class TransactionService {
@@ -34,23 +35,21 @@ public class TransactionService {
             throw new IllegalArgumentException("Insufficient balance in source account.");
         }
 
-        // Deduct the amount from the source account
+        // Subtract from source
         sourceAccount.setBalance(sourceAccount.getBalance().subtract(amount));
-        // Add the amount to the target account
+        // Add to target
         targetAccount.setBalance(targetAccount.getBalance().add(amount));
 
-        // Create and set up the new Transaction
+        // Updated account states
+        accountRepository.save(sourceAccount);
+        accountRepository.save(targetAccount);
+
+        // Record the transaction
         Transaction transaction = new Transaction();
         transaction.setSourceAccount(sourceAccount);
         transaction.setTargetAccount(targetAccount);
         transaction.setAmount(amount);
-        transaction.setCurrency(sourceAccount.getCurrency()); // Assuming the same currency for simplicity
-
-        // Record the transaction
+        transaction.setCurrency(sourceAccount.getCurrency()); // Assuming same currency for simplicity
         transactionRepository.save(transaction);
-
-        // The accounts are updated automatically due to CascadeType.ALL in Account entity relationships
-        accountRepository.save(sourceAccount);
-        accountRepository.save(targetAccount);
     }
 }

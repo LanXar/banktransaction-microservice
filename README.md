@@ -52,13 +52,30 @@ This project is a Spring Boot-based microservice designed to facilitate financia
 
    The server will start, and the microservice will be accessible on `http://localhost:8080`.
 
+## Accessing the H2 Console
+
+The H2 console is enabled by default for this project, allowing direct access to the in-memory database via a web interface for debugging and testing:
+
+- While the application is running, navigate to http://localhost:8080/h2-console.
+- Log in with the JDBC URL jdbc:h2:mem:testdb, using username haris and password password.
+- Now, you can view and interact with the database directly through the H2 console.
+
+
+## Running Tests
+
+To run the project's automated tests, use the following command:
+
+  ```bash
+  mvn test
+  ```
+
 ### API Usage
 
 - **Create Transaction:**
 
-  `POST /transactions`
-
-  Body:
+- **Endpoint:** `POST /transactions`
+- **Description:** Transfers a specified amount from one account to another.
+- **Request Body:**
 
   ```json
   {
@@ -69,14 +86,50 @@ This project is a Spring Boot-based microservice designed to facilitate financia
   }
   ```
 
+- sourceAccountId: ID of the account to debit.
+
+- targetAccountId: ID of the account to credit.
+
+- amount: The amount to be transferred.
+
+- currency: The currency of the transaction (USD, EUR).
+
+**Success Response:**
+
+```json
+{
+  "message": "Transaction successful",
+  "transactionId": "1",
+  "date": "2024-03-18T14:00:00Z"
+}
+```
+**Error Response:**
+
+```json
+{
+  "message": "Insufficient balance in source account.",
+  "transactionId": "1",
+  "date": "2024-03-18T14:20:00Z"
+}
+```
+
 - **Get Account Details:**
 
   `GET /accounts/{accountId}`
 
-## Running Tests
+- Description: Retrieves details of the specified account, including the current balance.
 
-To run the project's automated tests, use the following command:
+- URL Parameters:
 
-  ```bash
-  mvn test
-  ```
+  - accountId: The ID of the account whose details are being requested.
+
+**Success Response:**
+
+```json
+{
+  "accountId": "1",
+  "balance": 900.00,
+  "currency": "USD",
+  "createdAt": "2024-03-18T14:30:00Z"
+}
+```

@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 @Service
 public class TransactionService {
@@ -26,33 +25,32 @@ public class TransactionService {
             throw new IllegalArgumentException("Source and target accounts must be different.");
         }
 
-        Optional<Account> sourceAccount = accountRepository.findById(sourceAccountId);
-        Optional<Account> targetAccount = accountRepository.findById(targetAccountId);
+        Account sourceAccount = accountRepository.findById(sourceAccountId)
+                .orElseThrow(() -> new IllegalArgumentException("Source account does not exist."));
+        Account targetAccount = accountRepository.findById(targetAccountId)
+                .orElseThrow(() -> new IllegalArgumentException("Target account does not exist."));
 
-        if (sourceAccount.isEmpty() || targetAccount.isEmpty()) {
-            throw new IllegalArgumentException("One or both accounts do not exist.");
+        if (sourceAccount.getBalance().compareTo(amount) < 0) {
+            throw new IllegalArgumentException("Insufficient balance in source account.");
         }
 
-        if (sourceAccount.get().getBalance().compareTo(amount) < 0) {
-            throw new IllegalArgumentException("Insufficient balance.");
-        }
+        // Deduct the amount from the source account
+        sourceAccount.setBalance(sourceAccount.getBalance().subtract(amount));
+        // Add the amount to the target account
+        targetAccount.setBalance(targetAccount.getBalance().add(amount));
 
-        // Deduct from source
-        sourceAccount.get().setBalance(sourceAccount.get().getBalance().subtract(amount));
-        // Add to target
-        targetAccount.get().setBalance(targetAccount.get().getBalance().add(amount));
-
-        // Save the accounts
-        accountRepository.save(sourceAccount.get());
-        accountRepository.save(targetAccount.get());
+        // Create and set up the new Transaction
+        Transaction transaction = new Transaction();
+        transaction.setSourceAccount(sourceAccount);
+        transaction.setTargetAccount(targetAccount);
+        transaction.setAmount(amount);
+        transaction.setCurrency(sourceAccount.getCurrency()); // Assuming the same currency for simplicity
 
         // Record the transaction
-        Transaction transaction = new Transaction();
-        transaction.setSourceAccountId(sourceAccountId);
-        transaction.setTargetAccountId(targetAccountId);
-        transaction.setAmount(amount);
-        transaction.setCurrency(sourceAccount.get().getCurrency()); // Assuming same currency for simplicity
         transactionRepository.save(transaction);
+
+        // The accounts are updated automatically due to CascadeType.ALL in Account entity relationships
+        accountRepository.save(sourceAccount);
+        accountRepository.save(targetAccount);
     }
 }
-
